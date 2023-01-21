@@ -1,0 +1,97 @@
+﻿@model List<ProductDto>
+@{
+    ViewData["Title"] = "Index";
+}
+
+@*<partial name="_Notification" />*@
+<div class="layout-px-spacing">
+
+    <div class="row layout-top-spacing">
+
+        <div id="tableProgress" class="col-lg-12 col-12 layout-spacing">
+            <div class="statbox widget box box-shadow">
+                <div class="widget-header">
+                    <div class="row">
+
+                        <div class="col-6">
+                            <h2 class="text-primary">
+                                Məhsul siyahısı
+                            </h2>
+                        </div>
+                        <div class="col-6 text-right">
+                            <a asp-controller="Products" asp-action="Create" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i>&nbsp; Yeni kateqoriya yarad
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="widget-content widget-content-area">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">#</th>
+                                    <th>Şəkil</th>
+                                    <th>Ad</th>
+                                    <th>Açıqlama</th>
+                                    <th>Kateqoriyası</th>
+                                    <th>Marka</th>
+                                    <th>Model</th>
+                                    <th>BirimQiymeti</th>
+                                    <th>ToplamMiqdar</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td class="text-center">@item.Id</td>
+                                            <td>
+                                                <img src="@item.PorfileDocPath" width="200px" height="200px" />
+
+                                            </td>
+                                            <td>@item.Name</td>
+
+                                            <td>@item.Description</td>
+                                            <td>@item.ProductCategoryId</td>
+                                            <td>@item.Marka</td>
+                                            <td>@item.Model</td>
+                                            <td>@item.UnitOfPrice</td>
+                                            <td>@item.TotalCount</td>
+                                            <td class="text-center">
+                                                <div class="w-75 btn-group" role="group">
+                                                    <a asp-controller="Products" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary mx-2">
+
+                                                        <i class="bi bi-pencil-square"></i> Edit
+                                                    </a>
+                                                    <a asp-controller="Products" asp-action="Delete" asp-route-id="@item.Id" class="btn btn-warning mx-2">
+
+                                                        <i class="bi bi-trash"></i>Delete
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+
+                                }
+
+
+                            </tbody>
+                        </table>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+
+
+</div>
+
