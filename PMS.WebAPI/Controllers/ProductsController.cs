@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using PMS.BLL.Service.Interface;
 using PMS.DAL.DBModel;
 using PMS.DAL.Dtos;
@@ -15,16 +16,18 @@ namespace PMS.WebAPI.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IGenericService<ProductDto, Product> _genericService;
-
-        public ProductsController(IGenericService<ProductDto, Product> genericService)
+        private readonly ILogger<ProductsController> _looger;
+        public ProductsController(IGenericService<ProductDto, Product> genericService, ILogger<ProductsController> looger)
         {
             _genericService = genericService;
+            _looger = looger;
         }
 
         [HttpGet]
         public async Task<ActionResult<List<ProductDto>>> GetList()
         {
             var response = await _genericService.GetListAsync();
+            _looger.LogInformation("List cagirildi");
             return response;
         }
 

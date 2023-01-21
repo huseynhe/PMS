@@ -1,7 +1,10 @@
+﻿using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +14,7 @@ using PMS.BLL.Service;
 using PMS.BLL.Service.Interface;
 using PMS.BLL.Validations;
 using PMS.DAL.Data;
+using PMS.DAL.DBModel;
 using PMS.DAL.Repository;
 using PMS.DAL.Repository.Interface;
 using Serilog;
@@ -39,14 +43,52 @@ namespace PMS.WebAdmin
             services.AddDbContext<AppDbContext>(option =>
             {
                 option.UseSqlServer(Configuration.GetConnectionString("DefaultConnectionString"));
+                option.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             });
+
+            services.AddIdentity<AppUser, AppRole>(opts =>
+            {
+
+                opts.User.RequireUniqueEmail = true;
+                opts.User.AllowedUserNameCharacters = "abcçdefgğhıijklmnoöpqrsştuüvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._";
+
+                opts.Password.RequiredLength = 4;
+                opts.Password.RequireNonAlphanumeric = false;
+                opts.Password.RequireLowercase = false;
+                opts.Password.RequireUppercase = false;
+                opts.Password.RequireDigit = false;
+
+            }).AddEntityFrameworkStores<AppDbContext>()
+          .AddDefaultTokenProviders();
+
+            CookieBuilder cookieBuilder = new CookieBuilder();
+            cookieBuilder.Name = "MyBlog";
+            cookieBuilder.HttpOnly = false;
+            cookieBuilder.SameSite = SameSiteMode.Lax;
+            cookieBuilder.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+
+            services.ConfigureApplicationCookie(opts =>
+            {
+
+                opts.LoginPath = new PathString("/Login/LogIn");
+                opts.LogoutPath = new PathString("/Login/LogOut");
+                opts.Cookie = cookieBuilder;
+                opts.SlidingExpiration = true;
+                opts.ExpireTimeSpan = System.TimeSpan.FromDays(60);
+                opts.AccessDeniedPath = new PathString("/Login/AccessDenied");
+            });
+
             services.AddAutoMapper(typeof(CustomMapping));
 
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped(typeof(IGenericService<,>), typeof(GenericService<,>));
             services.AddScoped<IProductService, ProductService>();
-            services.AddControllersWithViews()
-                        .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<ProductCategoryValidator>()); ;
+            //services.AddControllersWithViews()
+            //            .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<ProductCategoryValidator>());
+            services.AddControllersWithViews();
+            services.AddFluentValidationAutoValidation();
+            services.AddFluentValidationClientsideAdapters();
+            services.AddValidatorsFromAssembly(typeof(ProductCategoryValidator).Assembly);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -73,7 +115,7 @@ namespace PMS.WebAdmin
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Login}/{action=LogIn}/{id?}");
             });
         }
     }

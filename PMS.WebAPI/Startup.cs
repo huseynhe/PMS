@@ -1,7 +1,10 @@
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -14,8 +17,10 @@ using PMS.BLL.Service;
 using PMS.BLL.Service.Interface;
 using PMS.BLL.Validations;
 using PMS.DAL.Data;
+using PMS.DAL.DBModel;
 using PMS.DAL.Repository;
 using PMS.DAL.Repository.Interface;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,6 +40,10 @@ namespace PMS.WebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            Log.Logger = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.Console()
+                        .WriteTo.File("Log/log-.txt", rollingInterval: RollingInterval.Day)
+                        .CreateLogger();
+
             services.AddDbContext<AppDbContext>(option =>
             {
                 option.UseSqlServer(Configuration.GetConnectionString("DefaultConnectionString"));
@@ -45,8 +54,14 @@ namespace PMS.WebAPI
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped(typeof(IGenericService<,>), typeof(GenericService<,>));
 
+
+       
+
             services.AddControllers()
-                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<ProductCategoryValidator>()); 
+                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<ProductCategoryValidator>());
+
+      
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "PMS.WebAPI", Version = "v1" });
