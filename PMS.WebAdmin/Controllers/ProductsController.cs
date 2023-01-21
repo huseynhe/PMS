@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Logging;
 using PMS.BLL.Service;
 using PMS.BLL.Service.Interface;
 using PMS.DAL.DBModel;
@@ -18,10 +19,12 @@ namespace PMS.WebAdmin.Controllers
     {
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly IProductService _productService;
-        public ProductsController(IHostingEnvironment hostingEnvironment, IProductService productService)
+        private readonly ILogger<ProductsController> _looger;
+        public ProductsController(IHostingEnvironment hostingEnvironment, IProductService productService, ILogger<ProductsController> looger)
         {
             _hostingEnvironment = hostingEnvironment;
             _productService = productService;
+            _looger = looger;
         }
 
 
@@ -101,7 +104,7 @@ namespace PMS.WebAdmin.Controllers
             }
             product = item;
             product.CategoryDtos = productCategories;
-
+            _looger.LogError($"sistemdə olan {id}  id ilə product deyisdirilmisdir");
             return View(product);
         }
         [HttpPost]

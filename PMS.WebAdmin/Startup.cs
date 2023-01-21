@@ -13,6 +13,7 @@ using PMS.BLL.Validations;
 using PMS.DAL.Data;
 using PMS.DAL.Repository;
 using PMS.DAL.Repository.Interface;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +33,9 @@ namespace PMS.WebAdmin
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            Log.Logger = new LoggerConfiguration().MinimumLevel.Error().WriteTo.Console()
+        .WriteTo.File("log-.txt", rollingInterval: RollingInterval.Day)
+        .CreateLogger();
             services.AddDbContext<AppDbContext>(option =>
             {
                 option.UseSqlServer(Configuration.GetConnectionString("DefaultConnectionString"));
